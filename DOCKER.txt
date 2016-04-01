@@ -1,0 +1,496 @@
+DOCKER
+
+Docker is written in Go and makes use of several kernel features to deliver the functionality we’ve seen.
+
+
+
+docker run -i -t ubuntu /bin/bash
+In order, Docker does the following:
+
+Pulls the ubuntu image: Docker checks for the presence of the ubuntu image and, if it doesn’t exist locally on the host, then Docker downloads it from Docker Hub. If the image already exists, then Docker uses it for the new container.
+Creates a new container: Once Docker has the image, it uses it to create a container.
+Allocates a filesystem and mounts a read-write layer: The container is created in the file system and a read-write layer is added to the image.
+Allocates a network / bridge interface: Creates a network interface that allows the Docker container to talk to the local host.
+Sets up an IP address: Finds and attaches an available IP address from a pool.
+Executes a process that you specify: Runs your application, and;
+Captures and provides application output: Connects and logs standard input, outputs and errors for you to see how your application is running.
+
+1)Docker images are the build component of Docker.
+2)Docker registries are the distribution component of Docker.
+3)Docker containers are the run component of Docker.
+
+
+Namespaces
+Docker takes advantage of a technology called namespaces to provide the isolated workspace we call the container. When you run a container, Docker creates a set of namespaces for that container.
+
+This provides a layer of isolation: each aspect of a container runs in its own namespace and does not have access outside it.
+
+Some of the namespaces that Docker uses on Linux are:
+
+The pid namespace: Used for process isolation (PID: Process ID).
+The net namespace: Used for managing network interfaces (NET: Networking).
+The ipc namespace: Used for managing access to IPC resources (IPC: InterProcess Communication).
+The mnt namespace: Used for managing mount-points (MNT: Mount).
+The uts namespace: Used for isolating kernel and version identifiers. (UTS: Unix Timesharing System).
+
+
+## Installtion of Docker
+
+root@devOps:~# apt-get update
+
+root@devOps:~# apt-get install -y docker.io
+
+
+root@devOps:~# docker --version
+Docker version 1.6.2, build 7c8fca2
+root@devOps:~# docker version
+Client version: 1.6.2
+Client API version: 1.18
+Go version (client): go1.5.1
+Git commit (client): 7c8fca2
+OS/Arch (client): linux/amd64
+Server version: 1.6.2
+Server API version: 1.18
+Go version (server): go1.5.1
+Git commit (server): 7c8fca2
+OS/Arch (server): linux/amd64
+root@devOps:~# docker info
+Containers: 0
+Images: 0
+Storage Driver: aufs
+ Root Dir: /var/lib/docker/aufs
+ Backing Filesystem: extfs
+ Dirs: 0
+ Dirperm1 Supported: true
+Execution Driver: native-0.2
+Kernel Version: 4.2.0-16-generic
+Operating System: Ubuntu 15.10
+CPUs: 1
+Total Memory: 992.9 MiB
+Name: devOps
+ID: R5EL:O4RT:4BSI:EODC:T2H6:QYFL:HKNN:WNEZ:3S2J:J6K2:S6NB:JERI
+WARNING: No swap limit support
+root@devOps:~#
+
+root@devOps:~# ll /var/run/
+
+srw-rw----  1 root  docker    0 Mar 30 15:52 docker.sock=
+
+
+root@devOps:~# cat /etc/group
+docker:x:129:
+
+root@devOps:~# gpasswd -a "nilesh" docker
+Adding user nilesh to group docker
+root@devOps:~#
+
+root@devOps:~# cat /etc/group
+docker:x:129:nilesh
+
+## Upgarde Docker on Ubuntu
+
+
+root@devOps:~# wget -qO- https://get.docker.io/gpg | sudo apt-key add -
+OK
+root@devOps:~# echo deb http://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list
+root@devOps:~# apt-get update
+
+root@ubuntu:~# apt-get install -y lxc-docker
+
+root@devOps:~# docker -v
+Docker version 1.9.1, build a34a1d5
+root@devOps:~#
+
+
+## Docker install on Centos7
+
+uname -r
+3.10.0-229.el7.x86_64
+
+yum update
+
+yum install -y docker
+
+# Got below Error :
+Transaction check error:
+  file /usr/lib/systemd/system/blk-availability.service from install of device-mapper-7:1.02.107-5.el7_2.1.x86_64 conflicts with file from package lvm2-7:2.02.105-14.el7.x86_64
+  file /usr/sbin/blkdeactivate from install of device-mapper-7:1.02.107-5.el7_2.1.x86_64 conflicts with file from package lvm2-7:2.02.105-14.el7.x86_64
+  file /usr/share/man/man8/blkdeactivate.8.gz from install of device-mapper-7:1.02.107-5.el7_2.1.x86_64 conflicts with file from package lvm2-7:2.02.105-14.el7.x86_64
+
+# Resolve :
+
+https://bugzilla.redhat.com/show_bug.cgi?id=1294128
+
+After 'yum upgrade lvm2'
+
+[root@localhost ~]# yum upgrade lvm2
+
+[root@localhost ~]# yum -install -y docker
+
+[root@localhost ~]# service docker start
+Redirecting to /bin/systemctl start  docker.service
+[root@localhost ~]# service docker status
+Redirecting to /bin/systemctl status  docker.service
+docker.service - Docker Application Container Engine
+   Loaded: loaded (/usr/lib/systemd/system/docker.service; disabled)
+   Active: active (running) 
+
+ 
+ [root@localhost ~]# docker -v
+Docker version 1.8.2-el7.centos, build a01dc02/1.8.2
+[root@localhost ~]# docker version
+Client:
+ Version:      1.8.2-el7.centos
+ API version:  1.20
+ Package Version: docker-1.8.2-10.el7.centos.x86_64
+ Go version:   go1.4.2
+ Git commit:   a01dc02/1.8.2
+ Built:
+ OS/Arch:      linux/amd64
+
+Server:
+ Version:      1.8.2-el7.centos
+ API version:  1.20
+ Package Version:
+ Go version:   go1.4.2
+ Git commit:   a01dc02/1.8.2
+ Built:
+ OS/Arch:      linux/amd64
+[root@localhost ~]# docker info
+Containers: 0
+Images: 0
+Storage Driver: devicemapper
+ Pool Name: docker-253:1-918086-pool
+ Pool Blocksize: 65.54 kB
+ Backing Filesystem: extfs
+ Data file: /dev/loop0
+ Metadata file: /dev/loop1
+ Data Space Used: 307.2 MB
+ Data Space Total: 107.4 GB
+ Data Space Available: 23.85 GB
+ Metadata Space Used: 733.2 kB
+ Metadata Space Total: 2.147 GB
+ Metadata Space Available: 2.147 GB
+ Udev Sync Supported: true
+ Deferred Removal Enabled: false
+ Data loop file: /var/lib/docker/devicemapper/devicemapper/data
+ Metadata loop file: /var/lib/docker/devicemapper/devicemapper/metadata
+ Library Version: 1.02.107-RHEL7 (2015-12-01)
+Execution Driver: native-0.2
+Logging Driver: json-file
+Kernel Version: 3.10.0-123.20.1.el7.x86_64
+Operating System: CentOS Linux 7 (Core)
+CPUs: 3
+Total Memory: 994.2 MiB
+Name: localhost.localdomain
+ID: UXFX:IZZQ:PJ3L:L3ST:RUD3:6C2Y:LK3R:JEJO:A6N7:UDIY:WGGK:DRJ2
+WARNING: bridge-nf-call-iptables is disabled
+WARNING: bridge-nf-call-ip6tables is disabled
+[root@localhost ~]#
+
+
+## DOCKER socket conntion over internet ::
+
+# Working on Ubuntu :: Here Ubuntu is as a Daemon
+
+root@devOps:~# netstat -tpl
+
+root@devOps:~# service docker stop
+root@devOps:~# service docker status
+
+root@devOps:~# docker -H 172.27.59.67:2375 -d &
+[1] 5315
+root@devOps:~# Warning: '-d' is deprecated, it will be removed soon. See usage.
+WARN[0000] please use 'd
+
+root@devOps:~# netstat -tpl
+
+tcp        0      0 devops.cybage.com:2375  *:*                     LISTEN      5315/docker
+
+root@devOps:~# docker info
+Cannot connect to the Docker daemon. Is the docker daemon running on this host?
+root@devOps:~# 
+
+# Working on Centos7 :: Here Centos7 is as a Client :
+
+[root@localhost ~]# export DOCKER_HOST="tcp://172.27.59.67:2375"
+
+[root@localhost ~]# docker version
+Client:
+ Version:      1.8.2-el7.centos
+ API version:  1.20
+ Package Version: docker-1.8.2-10.el7.centos.x86_64
+ Go version:   go1.4.2
+ Git commit:   a01dc02/1.8.2
+ Built:
+ OS/Arch:      linux/amd64
+
+Server:
+ Version:      1.9.1
+ API version:  1.21
+ Package Version:
+ Go version:   go1.4.3
+ Git commit:   a34a1d5
+ Built:        Fri Nov 20 17:56:04 UTC 2015
+ OS/Arch:      linux/amd64
+[root@localhost ~]# 
+
+# Centos7 machine treat as client Version:      1.8.2-el7.centos
+
+# Back to local client - server Deamon on Centos7
+
+[root@localhost ~]# export DOCKER_HOST=
+[root@localhost ~]# docker version
+Client:
+ Version:      1.8.2-el7.centos
+ API version:  1.20
+ Package Version: docker-1.8.2-10.el7.centos.x86_64
+ Go version:   go1.4.2
+ Git commit:   a01dc02/1.8.2
+ Built:
+ OS/Arch:      linux/amd64
+
+Server:
+ Version:      1.8.2-el7.centos
+ API version:  1.20
+ Package Version:
+ Go version:   go1.4.2
+ Git commit:   a01dc02/1.8.2
+ Built:
+ OS/Arch:      linux/amd64
+[root@localhost ~]#
+
+## On Ubuntu : docker.service is masked we cannot start service we have to unmask it:
+root@devOps:~# docker info
+Cannot connect to the Docker daemon. Is the docker daemon running on this host?
+
+root@devOps:~# service docker start
+Failed to start docker.service: Unit docker.service is masked.
+root@devOps:~# 
+
+root@devOps:~# systemctl unmask docker.service
+Removed symlink /etc/systemd/system/docker.service.
+root@devOps:~# systemctl unmask docker.socket
+Removed symlink /etc/systemd/system/docker.socket.
+root@devOps:~# systemctl start docker.service
+root@devOps:~#
+
+## Runing Centos Container on ubuntu Host
+
+root@devOps:~# docker run -it centos /bin/bash
+Unable to find image 'centos:latest' locally
+latest: Pulling from library/centos
+
+fa5be2806d4c: Pull complete
+ec6bd55c6a0a: Pull complete
+721496b876b6: Pull complete
+eb98cdc284d4: Pull complete
+Digest: sha256:381f21e4c7b3724c6f420b2bcfa6e13e47ed155192869a2a04fa10f944c78476
+Status: Downloaded newer image for centos:latest
+[root@026f395231ad /]#
+
+# It pull latest Image if we didn't mention in docker run command
+
+[root@026f395231ad /]# cat /etc/redhat-release
+CentOS Linux release 7.2.1511 (Core)
+[root@026f395231ad /]#
+
+## We can create file on container and we can view that file on host docker machine ::
+
+# Created file on CentOS Container
+[root@42e73490f5ce /]# vi /tmp/testfile.txt
+[root@42e73490f5ce /]# cat /tmp/testfile.txt
+SHIV
+[root@42e73490f5ce /]#
+
+# We can view that file on Docker host machine Ubuntu
+root@devOps:/var/lib/docker/aufs/diff/42e73490f5ce5820a7de0bc9c872ba4ac18e70a02050ef7ff438697da735e171# ll
+total 24
+drwxr-xr-x  6 root root 4096 Mar 31 10:54 ./
+drwxr-xr-x 12 root root 4096 Mar 31 10:51 ../
+dr-xr-x---  2 root root 4096 Mar 31 10:54 root/
+drwxrwxrwt  2 root root 4096 Mar 31 10:52 tmp/
+-r--r--r--  1 root root    0 Mar 31 10:51 .wh..wh.aufs
+drwx------  2 root root 4096 Mar 31 10:51 .wh..wh.orph/
+drwx------  2 root root 4096 Mar 31 10:51 .wh..wh.plnk/
+root@devOps:/var/lib/docker/aufs/diff/42e73490f5ce5820a7de0bc9c872ba4ac18e70a02050ef7ff438697da735e171# cat tmp/testfile.txt
+SHIV
+root@devOps:/var/lib/docker/aufs/diff/42e73490f5ce5820a7de0bc9c872ba4ac18e70a02050ef7ff438697da735e171#
+
+## Docker creates images with multiple layered images
+
+
+root@devOps:~# docker pull coreos/apache
+Using default tag: latest
+latest: Pulling from coreos/apache
+
+d634beec75db: Pull complete
+8b877d3adb63: Pull complete
+95dde7ac21e8: Pull complete
+7aaa39173c60: Pull complete
+Digest: sha256:9af520cee7bedcda564970ff790cdf2e72b6daccce8539f6b3c880ed7fc21091
+Status: Downloaded newer image for coreos/apache:latest
+root@devOps:~#
+
+
+root@devOps:~# cd /var/lib/docker/aufs/layers/
+root@devOps:/var/lib/docker/aufs/layers# cat d634beec75db64004deb5878e6234311d42edc0a4a19199b300ae4c4c9e2e989
+root@devOps:/var/lib/docker/aufs/layers# cat 7aaa39173c60e6020401b7aa2bc4e48faada6b1b34d6c713f15ce4a97b23ae8b
+root@devOps:/var/lib/docker/aufs/layers# cat 7aaa39173c60e6020401b7aa2bc4e48faada6b1b34d6c713f15ce4a97b23ae8b
+95dde7ac21e851a66266522631416f9b7d4121eff8ae3c840bf9e7067474ac09
+8b877d3adb634e097841c1b6df6571a8bb5a5ff90d6ad8b8cc5518c291c1d957
+d634beec75db64004deb5878e6234311d42edc0a4a19199b300ae4c4c9e2e989
+root@devOps:/var/lib/docker/aufs/layers# cat 95dde7ac21e851a66266522631416f9b7d4121eff8ae3c840bf9e7067474ac09
+8b877d3adb634e097841c1b6df6571a8bb5a5ff90d6ad8b8cc5518c291c1d957
+d634beec75db64004deb5878e6234311d42edc0a4a19199b300ae4c4c9e2e989
+root@devOps:/var/lib/docker/aufs/layers# cat 8b877d3adb634e097841c1b6df6571a8bb5a5ff90d6ad8b8cc5518c291c1d957
+d634beec75db64004deb5878e6234311d42edc0a4a19199b300ae4c4c9e2e989
+root@devOps:/var/lib/docker/aufs/layers# cat d634beec75db64004deb5878e6234311d42edc0a4a19199b300ae4c4c9e2e989
+root@devOps:/var/lib/docker/aufs/layers#
+
+root@devOps:~# docker run centos /bin/bash -c "echo 'BINGO' > /tmp/SUCCESS.txt"
+root@devOps:~# docker ps -a
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                     PORTS               NAMES
+f3f8f2921706        centos              "/bin/bash -c 'echo '"   9 seconds ago       Exited (0) 8 seconds ago                       naughty_boyd
+42e73490f5ce        centos              "/bin/bash"              4 hours ago         Exited (127) 4 hours ago                       backstabbing_albattani
+026f395231ad        centos              "/bin/bash"              21 hours ago        Exited (1) 20 hours ago                        goofy_dubinsky
+root@devOps:~#
+
+## Moving Docker Conainer from one host to another HOST
+
+root@devOps:~# docker run centos /bin/bash -c "echo 'BINGO' > /tmp/SUCCESS.txt"
+root@devOps:~# docker ps -a
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                     PORTS               NAMES
+f3f8f2921706        centos              "/bin/bash -c 'echo '"   9 seconds ago       Exited (0) 8 seconds ago                       naughty_boyd
+42e73490f5ce        centos              "/bin/bash"              4 hours ago         Exited (127) 4 hours ago                       backstabbing_albattani
+026f395231ad        centos              "/bin/bash"              21 hours ago        Exited (1) 20 hours ago                        goofy_dubinsky
+root@devOps:~#
+
+root@devOps:~# docker commit f3f8f2921706 my1image
+e28c182d4225ff0aa77f610f450f3ca0e32fe152ccd6c63ee3ec8eb8dacd91ee
+root@devOps:~#
+
+
+root@devOps:~# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED              VIRTUAL SIZE
+my1image            latest              e28c182d4225        About a minute ago   196.6 MB
+centos              latest              eb98cdc284d4        3 weeks ago          196.6 MB
+<none>              <none>              6fdebd7b0eb5        3 weeks ago          196.6 MB
+amolsh/mysql_test   latest              527298ac7056        9 months ago         339 MB
+coreos/apache       latest              7aaa39173c60        2 years ago          294.4 MB
+root@devOps:~#
+
+
+root@devOps:~# docker history my1image
+IMAGE               CREATED              CREATED BY                                      SIZE                COMMENT
+e28c182d4225        About a minute ago   /bin/bash -c echo 'BINGO' > /tmp/SUCCESS.txt    6 B
+eb98cdc284d4        3 weeks ago          /bin/sh -c #(nop) CMD ["/bin/bash"]             0 B
+721496b876b6        3 weeks ago          /bin/sh -c #(nop) LABEL name=CentOS Base Imag   0 B
+ec6bd55c6a0a        3 weeks ago          /bin/sh -c #(nop) ADD file:72852fc7626d233343   196.6 MB
+fa5be2806d4c        6 months ago         /bin/sh -c #(nop) MAINTAINER The CentOS Proje   0 B
+root@devOps:~#
+
+root@devOps:~# docker save -o /tmp/my1image.tar my1image
+root@devOps:~# ls -a /tmp/my1image.tar
+/tmp/my1image.tar
+root@devOps:~#
+
+[nilesh@localhost ~]$ tar -tf my1image.tar
+721496b876b6bfa189cfa194de6a2000deff263d55ef0aa30ed01dc0db4d9a5b/
+721496b876b6bfa189cfa194de6a2000deff263d55ef0aa30ed01dc0db4d9a5b/VERSION
+721496b876b6bfa189cfa194de6a2000deff263d55ef0aa30ed01dc0db4d9a5b/json
+721496b876b6bfa189cfa194de6a2000deff263d55ef0aa30ed01dc0db4d9a5b/layer.tar
+e28c182d4225ff0aa77f610f450f3ca0e32fe152ccd6c63ee3ec8eb8dacd91ee/
+e28c182d4225ff0aa77f610f450f3ca0e32fe152ccd6c63ee3ec8eb8dacd91ee/VERSION
+e28c182d4225ff0aa77f610f450f3ca0e32fe152ccd6c63ee3ec8eb8dacd91ee/json
+e28c182d4225ff0aa77f610f450f3ca0e32fe152ccd6c63ee3ec8eb8dacd91ee/layer.tar
+eb98cdc284d483507e88577eaf492a179809bd5a0a1b0651a394844138edb5ab/
+eb98cdc284d483507e88577eaf492a179809bd5a0a1b0651a394844138edb5ab/VERSION
+eb98cdc284d483507e88577eaf492a179809bd5a0a1b0651a394844138edb5ab/json
+eb98cdc284d483507e88577eaf492a179809bd5a0a1b0651a394844138edb5ab/layer.tar
+ec6bd55c6a0aaeb2226e7b69826ad6f0442b64709f7bed92ec1e235e5ec0674a/
+ec6bd55c6a0aaeb2226e7b69826ad6f0442b64709f7bed92ec1e235e5ec0674a/VERSION
+ec6bd55c6a0aaeb2226e7b69826ad6f0442b64709f7bed92ec1e235e5ec0674a/json
+ec6bd55c6a0aaeb2226e7b69826ad6f0442b64709f7bed92ec1e235e5ec0674a/layer.tar
+fa5be2806d4c9aa0f75001687087876e47bb45dc8afb61f0c0e46315500ee144/
+fa5be2806d4c9aa0f75001687087876e47bb45dc8afb61f0c0e46315500ee144/VERSION
+fa5be2806d4c9aa0f75001687087876e47bb45dc8afb61f0c0e46315500ee144/json
+fa5be2806d4c9aa0f75001687087876e47bb45dc8afb61f0c0e46315500ee144/layer.tar
+repositories
+[nilesh@localhost ~]$
+
+
+[nilesh@localhost ~]$ docker load -i my1image.tar
+[nilesh@localhost ~]$ docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED                  VIRTUAL SIZE
+my1image            latest              e28c182d4225        Less than a second ago   196.6 MB
+[nilesh@localhost ~]$
+
+[nilesh@localhost ~]$ docker run -it my1image /bin/bash
+[root@745e5005b807 /]# cat /tmp/SUCCESS.txt
+BINGO
+[root@745e5005b807 /]#
+
+## Running container and Detatech from termianl and execute in backgroud
+
+root@devOps:~# docker run -d centos /bin/bash -c "ping 8.8.8.8 -c 50"
+18c6f29e9dcebd6bf7e13469cc53244c08d74f16919c8a4c036c6d05df8ad328
+root@devOps:~# docker ps
+CONTAINER ID        IMAGE                       COMMAND                  CREATED             STATUS              PORTS                  NAMES
+18c6f29e9dce        centos                      "/bin/bash -c 'ping 8"   7 seconds ago       Up 7 seconds                               furious_spence
+
+root@devOps:~# docker top 18c6f29e9dce
+UID                 PID                 PPID                C                   STIME               TTY                 TIME                CMD
+root                8513                6298                0                   16:49               ?                   00:00:00            ping 8.8.8.8 -c 50
+root@devOps:~#
+
+## To get detailed info about Container
+
+docker inspect 18c6f29e9dce
+[
+{
+    "Id": "18c6f29e9dcebd6bf7e13469cc53244c08d74f16919c8a4c036c6d05df8ad328",
+    "Created": "2016-03-31T11:19:52.443369425Z",
+    "Path": "/bin/bash",
+    "Args": [
+
+	
+## How to run container in backgroud with key [Ctrl + P + Q]
+	
+root@devOps:~# docker run -it centos /bin/bash
+[root@f198061ad92b /]# 
+key [Ctrl + P + Q]
+root@devOps:~#
+root@devOps:~#
+root@devOps:~#
+root@devOps:~# docker ps
+CONTAINER ID        IMAGE                       COMMAND             CREATED              STATUS              PORTS                  NAMES
+f198061ad92b        centos                      "/bin/bash"         About a minute ago   Up About a minute                          jolly_bartik
+f2118070cd05        amolsh/php-app-db-url-env   "/run.sh"           11 minutes ago       Up 11 minutes       0.0.0.0:8080->80/tcp   php_app_url3
+root@devOps:~#
+
+root@devOps:~# docker stop f198061ad92b
+f198061ad92b
+root@devOps:~# docker ps
+CONTAINER ID        IMAGE                       COMMAND             CREATED             STATUS              PORTS                  NAMES
+
+## DOCKER Container we can start container which last process was running
+
+root@devOps:~# docker ps -l
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                       PORTS               NAMES
+f198061ad92b        centos              "/bin/bash"         8 minutes ago       Exited (137) 4 minutes ago                       jolly_bartik
+root@devOps:~# docker start f198061ad92b
+f198061ad92b
+root@devOps:~# docker attach f198061ad92b
+
+[root@f198061ad92b /]#
+[root@f198061ad92b /]#
+[root@f198061ad92b /]# root@devOps:~#
+root@devOps:~#
+root@devOps:~# docker ps
+CONTAINER ID        IMAGE                       COMMAND             CREATED             STATUS              PORTS                  NAMES
+f198061ad92b        centos                      "/bin/bash"         10 minutes ago      Up About a minute                          jolly_bartik
+
+
+
+
