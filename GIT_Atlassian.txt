@@ -1,0 +1,217 @@
+##Installation of GIT
+
+nilesh@devOps:~$ sudo apt-get install git-core
+
+##Creating new GIT Repo
+
+nilesh@devOps:~/Git/Repo/Nils$ git init
+Initialized empty Git repository in /home/nilesh/Git/Repo/Nils/.git/
+nilesh@devOps:~/Git/Repo/Nils$
+
+## Cloning of above Repo
+
+nilesh@devOps:~/Git_Clone/Repo$ git clone /home/nilesh/Git/Repo/Nils
+Cloning into 'Nils'...
+warning: You appear to have cloned an empty repository.
+done.
+nilesh@devOps:
+
+## GIT CONFIG
+
+nilesh@devOps:~/Git/Repo/Nils$ git config --global user.name nils
+nilesh@devOps:~/Git/Repo/Nils$ git config --global user.email nileshsu@cybage.com
+nilesh@devOps:~/Git/Repo/Nils$
+
+## Creating Alias
+
+nilesh@devOps:~/Git/Repo/Nils/.git$ git config --global alias.br branch
+nilesh@devOps:
+
+## Details regarding CONFIG as we mention --global all info regarding will be save on user's home directroy in file ".gitconfig"
+
+nilesh@devOps:~$ pwd
+/home/nilesh
+nilesh@devOps:~$ cat .gitconfig
+[user]
+        name = nils
+        email = nileshsu@cybage.com
+[alias]
+        br = branch
+nilesh@devOps:~$
+
+## git add and git commit
+
+nilesh@devOps:~/Git/Repo/Nils$ git add test_file.txt
+nilesh@devOps:~/Git/Repo/Nils$ git commit -m "My first commit with SHIV text"
+[master (root-commit) cbf817b] My first commit with SHIV text
+ 1 file changed, 1 insertion(+)
+ create mode 100644 test_file.txt
+nilesh@devOps:~/Git/Repo/Nils$
+
+## git status to check
+
+nilesh@devOps:~/Git/Repo/Nils$ vim test_file.txt
+nilesh@devOps:~/Git/Repo/Nils$ git status
+On branch master
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   test_file.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")
+nilesh@devOps:~/Git/Repo/Nils$ git commit -m "Commit without git add"
+On branch master
+Changes not staged for commit:
+        modified:   test_file.txt
+
+no changes added to commit
+nilesh@devOps:~/Git/Repo/Nils$ git add test_file.txt
+nilesh@devOps:~/Git/Repo/Nils$ git commit -m "Commit with git add"
+[master bf933cf] Commit with git add
+ 1 file changed, 1 insertion(+)
+nilesh@devOps:~/Git/Repo/Nils$
+
+## GIT LOGS
+
+nilesh@devOps:~/Git/Repo/Nils$ git log
+commit bf933cf8e7199f3f841f5c6d7f16441eae34fa8d
+Author: nils <nileshsu@cybage.com>
+Date:   Wed Mar 23 22:52:35 2016 +0530
+
+    Commit with git add
+
+commit cbf817bcbca9ead68532754b22d5eccdec70efb1
+Author: nils <nileshsu@cybage.com>
+Date:   Wed Mar 23 22:38:29 2016 +0530
+
+    My first commit with SHIV text
+nilesh@devOps:
+
+The first line warrants some explanation. The 40-character string after commit is an SHA-1 checksum of the commit’s contents. 
+This serves two purposes. 
+First, it ensures the integrity of the commit—if it was ever corrupted, the commit would generate a different checksum. 
+Second, it serves as a unique ID for the commit.
+
+## GIT CHECKOUT
+Checking out a commit makes the entire working directory match that commit. This can be used to view an old state of your project without 
+altering your current state in any way. Checking out a file lets you see an old version of that particular file, leaving the rest of your 
+working directory untouched. ##
+
+nilesh@devOps:~/Git/Repo/Nils$ git log --oneline
+bf933cf Commit with git add
+cbf817b My first commit with SHIV text
+nilesh@devOps:~/Git/Repo/Nils$ git checkout bf933cf
+Note: checking out 'bf933cf'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by performing another checkout.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -b with the checkout command again. Example:
+
+  git checkout -b <new-branch-name>
+
+HEAD is now at bf933cf... Commit with git add
+nilesh@devOps:~/Git/Repo/Nils$ cat test_file.txt
+SHIV
+NILS
+nilesh@devOps:~/Git/Repo/Nils$ git checkout master
+Switched to branch 'master'
+nilesh@devOps:~/Git/Repo/Nils$ git log --oneline
+bf933cf Commit with git add
+cbf817b My first commit with SHIV text
+nilesh@devOps:~/Git/Repo/Nils$ git checkout cbf817b
+Note: checking out 'cbf817b'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by performing another checkout.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -b with the checkout command again. Example:
+
+  git checkout -b <new-branch-name>
+
+HEAD is now at cbf817b... My first commit with SHIV text
+nilesh@devOps:~/Git/Repo/Nils$ cat test_file.txt
+SHIV
+nilesh@devOps:~/Git/Repo/Nils$
+
+## GIT REVERT and RESET
+git revert
+
+The git revert command undoes a committed snapshot. But, instead of removing the commit from the project history, it figures out how to undo the 
+changes introduced by the commit and appends a new commit with the resulting content. This prevents Git from losing history, which is important for 
+the integrity of your revision history and for reliable collaboration
+
+git reset
+
+If git revert is a “safe” way to undo changes, you can think of git reset as the dangerous method. When you undo with git reset(and the commits are 
+no longer referenced by any ref or the reflog), there is no way to retrieve the original copy—it is a permanent undo. Care must be taken when using 
+this tool, as it’s one of the only Git commands that has the potential to lose your work.
+
+The point is, make sure that you’re using git reset <commit> on a local experiment that went wrong—not on published changes. If you need to fix a 
+public commit, the git revert command was designed specifically for this purpose.
+
+## GIT commit --amend
+
+nilesh@devOps:~/Git/Repo/Nils$ git log
+commit 43da96ebd7b526b449814474fe584cfbe8d430a6
+Author: nils <nileshsu@cybage.com>
+Date:   Tue Mar 29 17:21:21 2016 +0530
+
+    My thrid commit
+
+commit cbf817bcbca9ead68532754b22d5eccdec70efb1
+Author: nils <nileshsu@cybage.com>
+Date:   Wed Mar 23 22:38:29 2016 +0530
+
+    My first commit with SHIV text
+nilesh@devOps:~/Git/Repo/Nils$ git commit --amend
+[detached HEAD 00b6df6] My thrid commit :: commit overwirte
+ Date: Tue Mar 29 17:21:21 2016 +0530
+ 1 file changed, 1 insertion(+)
+nilesh@devOps:~/Git/Repo/Nils$ git log
+commit 00b6df6084b6c3dccd185f1a6f24441ee96201e3
+Author: nils <nileshsu@cybage.com>
+Date:   Tue Mar 29 17:21:21 2016 +0530
+
+    My thrid commit :: commit overwirte
+
+commit cbf817bcbca9ead68532754b22d5eccdec70efb1
+Author: nils <nileshsu@cybage.com>
+Date:   Wed Mar 23 22:38:29 2016 +0530
+
+    My first commit with SHIV text
+nilesh@devOps:~/Git/Repo/Nils$
+
+## GIT Branching
+
+nilesh@devOps:~/Git/Repo/Nils$ git branch
+* (HEAD detached from cbf817b)
+  master
+nilesh@devOps:~/Git/Repo/Nils$ git branch crazy-experiment
+nilesh@devOps:~/Git/Repo/Nils$ git branch
+* (HEAD detached from cbf817b)
+  crazy-experiment
+  master
+nilesh@devOps:~/Git/Repo/Nils$
+
+## GIT Checkout within branch
+
+nilesh@devOps:~/Git/Repo/Nils$ git checkout crazy-experiment
+Switched to branch 'crazy-experiment'
+nilesh@devOps:~
+
+## GIT merge
+
+nilesh@devOps:~/Git/Repo/Nils$ git merge crazy-experiment
+Already up-to-date.
+nilesh@devOps:~/Git/Repo/Nils$ git branch -d crazy-experiment
+Deleted branch crazy-experiment (was b1fd5ce).
+nilesh@devOps:~/Git/Repo/Nils$ git branch
+* master
+nilesh@devOps:~/Git/Repo/Nils$
+
