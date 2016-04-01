@@ -491,6 +491,184 @@ root@devOps:~# docker ps
 CONTAINER ID        IMAGE                       COMMAND             CREATED             STATUS              PORTS                  NAMES
 f198061ad92b        centos                      "/bin/bash"         10 minutes ago      Up About a minute                          jolly_bartik
 
+** For full blown container we can take images from 'phusion/baseimage'
+
+## Running top command on DOCKER host, so that we can check the process runnin in container.
+
+
+root@ubuntu:~/Nils/GIT/Repo/shiv# docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+d16cc1a3236c        my1image            "/bin/bash"         4 hours ago         Up 9 seconds                            cocky_noyce
+root@ubuntu:~/Nils/GIT/Repo/shiv# docker top d16cc1a3236c
+UID                 PID                 PPID                C                   STIME               TTY                 TIME                CMD
+root                1430                674                 0                   17:48               pts/3               00:00:00            /bin/bash
+root@ubuntu:~/Nils/GIT/Repo/shiv# docker attach d16cc1a3236c
+
+[root@d16cc1a3236c /]# ps -ef
+UID        PID  PPID  C STIME TTY          TIME CMD
+root         1     0  0 12:18 ?        00:00:00 /bin/bash
+root        18     1  0 12:19 ?        00:00:00 ps -ef
+[root@d16cc1a3236c /]#
+
+## How to connect to conatiner like 'docker attach', with help of 'docker exec' command, we can come out of container without stopping 
+container [like-crtl+P+Q]
+
+root@ubuntu:~# docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+d16cc1a3236c        my1image            "/bin/bash"         5 hours ago         Up 12 minutes                           cocky_noyce
+root@ubuntu:~# docker inspect d16cc1a3236c | grep pid
+root@ubuntu:~# docker inspect d16cc1a3236c | grep -i pid
+        "Pid": 1430,
+        "PidMode": "",
+root@ubuntu:~# docker top d16cc1a3236c
+UID                 PID                 PPID                C                   STIME               TTY                 TIME                CMD
+root                1430                674                 0                   17:48               pts/3               00:00:00            /bin/bash
+root@ubuntu:~# 
+
+root@ubuntu:~# docker exec -it d16cc1a3236c /bin/bash
+[root@d16cc1a3236c /]#
+[root@d16cc1a3236c /]#
+[root@d16cc1a3236c /]# ps -ef
+UID        PID  PPID  C STIME TTY          TIME CMD
+root         1     0  0 12:18 ?        00:00:00 /bin/bash
+root        20     0  0 12:37 ?        00:00:00 /bin/bash
+root        34    20  0 12:37 ?        00:00:00 ps -ef
+[root@d16cc1a3236c /]# exit
+root@ubuntu:~# docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+d16cc1a3236c        my1image            "/bin/bash"         5 hours ago         Up 19 minutes                           cocky_noyce
+root@ubuntu:~#
+
+**Frist Presentation on DOCKER youtube :: https://www.youtube.com/watch?v=wW9CAH9nSLs
+
+## Building Images from DOCKER file
+
+
+root@ubuntu:~/Nils/DOCKER# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+my1image            latest              e28c182d4225        26 hours ago        196.6 MB
+root@ubuntu:~/Nils/DOCKER# 
+
+root@ubuntu:~/Nils/DOCKER# cat Dockerfile
+#Building CentOS 7.0 docker image
+FROM my1image
+MAINTAINER nileshsu@cybage.com
+RUN yum update
+CMD ["echo","HELLO WORLD"]
+
+root@ubuntu:~/Nils/DOCKER# docker build -t helloworld.0.1 .
+Sending build context to Docker daemon 3.072 kB
+Step 1 : FROM my1image
+ ---> e28c182d4225
+Step 2 : MAINTAINER nileshsu@cybage.com
+ ---> Using cache
+ ---> 6369829a6b13
+Step 3 : CMD echo HELLO WORLD
+ ---> Running in 97e1d87e73b4
+ ---> ccbac51b7a8a
+Removing intermediate container 97e1d87e73b4
+Successfully built ccbac51b7a8a
+
+root@ubuntu:~/Nils/DOCKER# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+helloworld.0.1      latest              ccbac51b7a8a        8 seconds ago       196.6 MB
+my1image            latest              e28c182d4225        26 hours ago        196.6 MB
+root@ubuntu:~/Nils/DOCKER#
+
+root@ubuntu:~/Nils/DOCKER# docker history helloworld.0.1
+IMAGE               CREATED             CREATED BY                                      SIZE                COMMENT
+ccbac51b7a8a        2 minutes ago       /bin/sh -c #(nop) CMD ["echo" "HELLO WORLD"]    0 B         
+6369829a6b13        6 minutes ago       /bin/sh -c #(nop) MAINTAINER nileshsu@cybage.   0 B         
+e28c182d4225        27 hours ago        /bin/bash -c echo 'BINGO' > /tmp/SUCCESS.txt    6 B         
+eb98cdc284d4        3 weeks ago         /bin/sh -c #(nop) CMD ["/bin/bash"]             0 B         
+721496b876b6        3 weeks ago         /bin/sh -c #(nop) LABEL name=CentOS Base Imag   0 B         
+ec6bd55c6a0a        3 weeks ago         /bin/sh -c #(nop) ADD file:72852fc7626d233343   196.6 MB    
+fa5be2806d4c        6 months ago        /bin/sh -c #(nop) MAINTAINER The CentOS Proje   0 B         
+root@ubuntu:~/Nils/DOCKER#
+
+root@ubuntu:~/Nils/DOCKER# docker run helloworld.0.1
+HELLO WORLD
+root@ubuntu:~/Nils/DOCKER#
+
+
+## Push Image on docker Hub
+
+root@ubuntu:~/Nils/DOCKER# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+helloworld.0.1      latest              ccbac51b7a8a        17 minutes ago      196.6 MB
+my1image            latest              e28c182d4225        27 hours ago        196.6 MB
+root@ubuntu:
+
+root@ubuntu:~/Nils/DOCKER# docker tag e28c182d4225 nilesh7756/my1image:1.0
+root@ubuntu:~/Nils/DOCKER# docker images
+REPOSITORY            TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+helloworld.0.1        latest              ccbac51b7a8a        21 minutes ago      196.6 MB
+my1image              latest              e28c182d4225        27 hours ago        196.6 MB
+nilesh7756/my1image   1.0                 e28c182d4225        27 hours ago        196.6 MB
+root@ubuntu:~/Nils/DOCKER#
+
+** Before you run the push/pull try doing a 'docker login' in the terminal, then run the command.
+
+root@ubuntu:~/Nils/DOCKER# docker login
+Username: nilesh7756
+Password:
+Email: nnilesh7756@gmail.com
+WARNING: login credentials saved in /root/.docker/config.json
+Login Succeeded
+root@ubuntu:~/Nils/DOCKER#
+
+root@ubuntu:~/Nils/DOCKER# docker push nilesh7756/my1image:1.0
+The push refers to a repository [docker.io/nilesh7756/my1image] (len: 1)
+e28c182d4225: Pushed
+eb98cdc284d4: Pushed
+721496b876b6: Pushed
+ec6bd55c6a0a: Pushed
+fa5be2806d4c: Pushed
+1.0: digest: sha256:64ac3d74c8f5c3eaf7963f8cb4b193f9a6a9b05bcb717b0b1c10b324d070dd98 size: 8441
+root@ubuntu:~/Nils/DOCKER#
+
+## Pulling image from docker HUB 
+
+[root@nilsworkst ~]# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+[root@nilsworkst ~]# docker pull nilesh7756/my1image:1.0
+Trying to pull repository docker.io/nilesh7756/my1image ... 1.0: Pulling from nilesh7756/my1image
+
+fa5be2806d4c: Pull complete
+ec6bd55c6a0a: Pull complete
+721496b876b6: Pull complete
+eb98cdc284d4: Pull complete
+e28c182d4225: Pull complete
+Digest: sha256:64ac3d74c8f5c3eaf7963f8cb4b193f9a6a9b05bcb717b0b1c10b324d070dd98
+Status: Downloaded newer image for docker.io/nilesh7756/my1image:1.0
+
+[root@nilsworkst ~]# docker images
+REPOSITORY                      TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+docker.io/nilesh7756/my1image   1.0                 e28c182d4225        27 hours ago        196.6 MB
+[root@nilsworkst ~]#
+
+
+## How to delete Container and IMAGE
+
+** First we have to delete Container and we have to delete image
+
+root@ubuntu:~/Nils/DOCKER# docker ps -a
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                        PORTS               NAMES
+c1ed3ea44a69        helloworld.0.1      "/bin/bash"              29 minutes ago      Exited (0) 29 minutes ago                         loving_jepsen
+5e45cf5da2a9        helloworld.0.1      "echo 'HELLO WORLD'"     30 minutes ago      Exited (0) 30 minutes ago                         cocky_lumiere
+3f28e99824ce        6369829a6b13        "/bin/sh -c 'yum upda"   34 minutes ago      Exited (1) 34 minutes ago                         grave_shaw
+dfb5ca3a77e3        6369829a6b13        "/bin/sh -c 'apt-get "   37 minutes ago      Exited (127) 37 minutes ago                       cranky_mietner
+d16cc1a3236c        my1image            "/bin/bash"              6 hours ago         Exited (137) 15 seconds ago                       cocky_noyce
+root@ubuntu:~/Nils/DOCKER# docker rm d16cc1a3236c
+d16cc1a3236c
+root@ubuntu:~/Nils/DOCKER# docker images
+REPOSITORY            TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+helloworld.0.1        latest              ccbac51b7a8a        34 minutes ago      196.6 MB
+my1image              latest              e28c182d4225        27 hours ago        196.6 MB
+root@ubuntu:~/Nils/DOCKER# docker rmi e28c182d4225
+e28c182d4225
+root@ubuntu:~/Nils/DOCKER#
+
 
 
 
