@@ -1,4 +1,4 @@
-DOCKER
+﻿DOCKER
 
 Docker is written in Go and makes use of several kernel features to deliver the functionality we’ve seen.
 
@@ -670,5 +670,281 @@ e28c182d4225
 root@ubuntu:~/Nils/DOCKER#
 
 
+##4/4/2016
+
+## Create a Optimise Docker file :
+
+root@ubuntu:~/Nils/webserver# cat Dockerfile
+#Simple Webserver Docker Container
+FROM ubuntu
+RUN apt-get update && apt-get install -y \
+        apache2 \
+        apache2-utils \
+        vim \
+        && apt-get clean
+EXPOSE 80
+CMD ["apache2ctl", "-D", "FOREGROUND"]
+root@ubuntu:~/Nils/webserver#
+
+##Building above Dockerfile with docker build command
+
+root@ubuntu:~/Nils/webserver# docker build -t="webserver" .
+Sending build context to Docker daemon 3.072 kB
+Step 1 : FROM ubuntu
+ ---> 1a094f2972de
+Step 2
 
 
+root@ubuntu:~/Nils/webserver# docker images
+REPOSITORY            TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+webserver             latest              91c7302bb837        3 minutes ago       266.5 MB
+
+##Port Mapping of container from 80 to 8080
+
+root@ubuntu:~/Nils/webserver# docker run -d -p 8080:80 webserver fe407958ac83db6a079c3e40812205158f4c86fffa0fef0f28f7f2f17a93b37d
+root@ubuntu:~/Nils/webserver#
+
+root@ubuntu:~/Nils/webserver# docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                  NAMES
+fe407958ac83        webserver           "apache2ctl -D FOREGR"   2 minutes ago       Up 2 minutes        0.0.0.0:8080->80/tcp   sharp_ardinghelli
+root@ubuntu:~/Nils/webserver#
+
+# Checked on Browser : Windows Machine
+
+http://172.27.59.208:8080/
+
+root@ubuntu:~# docker port fe407958ac83
+80/tcp -> 0.0.0.0:8080
+root@ubuntu:~#
+
+
+
+##Give Entrypoint in Docker file
+
+root@ubuntu:~/Nils/webserver# cat Dockerfile
+#Simple Webserver Docker Container
+FROM ubuntu
+RUN apt-get update && apt-get install -y \
+        apache2 \
+        apache2-utils \
+        vim \
+        && apt-get clean
+EXPOSE 80
+#CMD ["apache2ctl", "-D", "FOREGROUND"]
+ENTRYPOINT ["echo"]
+root@ubuntu:~/Nils/webserver#
+
+
+root@ubuntu:~/Nils/webserver# docker build -t="ep1" .
+Sending build context to Docker daemon 3.072 kB
+Step 1 : 
+
+root@ubuntu:~/Nils/webserver# docker images
+REPOSITORY            TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+ep1                   latest              aab3e67de4d3        6 seconds ago       266.5 MB
+
+root@ubuntu:~/Nils/webserver# docker run -it ep1 /bin/bash
+/bin/bash
+root@ubuntu:
+
+# In above /bin/bash was took as argument as we have mention ENTRYPOINT in Dockerfile while creating BUILD.
+
+## Define ENV varibake in Dockerfile 
+
+root@ubuntu:~/Nils/webserver# cat Dockerfile
+#Simple Webserver Docker Container
+FROM ubuntu
+RUN apt-get update && apt-get install -y \
+        apache2 \
+        apache2-utils \
+        vim \
+        && apt-get clean
+EXPOSE 80
+ENV var1=Nilesh var2=Suryavanshi
+#CMD ["apache2ctl", "-D", "FOREGROUND"]
+#ENTRYPOINT ["echo"]
+root@ubuntu:~/Nils/webserver# docker build -t="env1" .
+Sending build context to Docker daemon 3.072 kB
+Step 1 :
+
+root@ubuntu:~/Nils/webserver# docker run -it env1 /bin/bash
+root@22876ac6e70e:/#
+
+root@22876ac6e70e:/# env
+var1=Nilesh
+var2=Suryavanshi
+HOSTNAME=22876ac6e70e
+TERM=xterm
+LS_COLORS
+
+##Using varible while in Dockerfile and check LOGS from Docker HOST
+
+root@ubuntu:~/Nils/webserver# cat Dockerfile
+#Simple Webserver Docker Container
+FROM ubuntu
+RUN apt-get update && apt-get install -y iputils-ping
+
+ENV var1=ping var2=8.8.8.8
+
+CMD $var1 $var2
+#CMD ["apache2ctl", "-D", "FOREGROUND"]
+#ENTRYPOINT ["echo"]
+root@ubuntu:~/Nils/webserver#
+
+BUILD the Image
+
+root@ubuntu:~/Nils/webserver# docker run -d pinger
+87af53d2ecd2d85ad26e1927e32671321bdf5501150c9b0a5fde1dac5b1f9638
+root@ubuntu:~/Nils/webserver# docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                  NAMES
+87af53d2ecd2        pinger              "/bin/sh -c '$var1 $v"   5 seconds ago       Up 4 seconds                               angry_easley
+
+
+# Checking logs from docker host
+
+root@ubuntu:~/Nils/webserver# docker logs 87af53d2ecd2
+PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.
+64 bytes from 8.8.8.8: icmp_seq=1 ttl=52 time=10.5 ms
+64 bytes from 8.8
+
+# Checking logs from docker host interactive
+
+root@ubuntu:~/Nils/webserver# docker logs -f 87af53d2ecd2
+PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.
+64 bytes from 8.8.8.8: icmp_seq=1 ttl=52 time=10.5 ms
+64 bytes 
+
+
+## Creating Volumes 
+
+#Creating a Container and Volume inside it 
+
+root@ubuntu:~/Nils/webserver# docker run -it -v /test-vol --name=nilsdb ubuntu /bin/bash
+root@1731062d8a9c:/# ll /test-vol/
+total 8
+drwxr-xr-x  2 root root 4096 Apr  4 12:27 ./
+drwxr-xr-x 33 root root 4096 Apr  4 12:27 ../
+root@1731062d8a9c:/#
+
+root@1731062d8a9c:/test-vol# pwd
+/test-vol
+root@1731062d8a9c:/test-vol# cat testfile
+SHIV
+root@1731062d8a9c:/test-vol#
+
+
+root@ubuntu:~/Nils/webserver# docker inspect 1731062d8a9c
+
+
+"Mounts": [
+        {
+            "Name": "f3c2532fc436694335e472c6a1de644a8b6b48ddabeda07748284d710f86b436",
+            "Source": "/var/lib/docker/volumes/f3c2532fc436694335e472c6a1de644a8b6b48ddabeda07748284d710f86b436/_data",
+            "Destination": "/test-vol",
+            "Driver": "local",
+            "Mode": "",
+            "RW": true
+        }
+
+		
+root@ubuntu:~/Nils/webserver# cat /var/lib/docker/volumes/f3c2532fc436694335e472c6a1de644a8b6b48ddabeda07748284d710f86b436/_data/testfile
+SHIV
+root@ubuntu:~/Nils/webserver#
+
+#We can share this Volume with another container
+
+root@ubuntu:~/Nils/webserver# docker run -it --volumes-from=nilsdb ubuntu /bin/bash
+root@74ef1d108acc:/# ll /test-vol/
+total 12
+drwxr-xr-x  2 root root 4096 Apr  4 12:31 ./
+drwxr-xr-x 33 root root 4096 Apr  4 12:38 ../
+-rw-r--r--  1 root root    5 Apr  4 12:31 testfile
+
+root@74ef1d108acc:/# cat /test-vol/testfile
+SHIV
+root@74ef1d108acc:/#
+
+##We can share Volume of host machine in container
+
+docker run -v /data:/data
+
+## DOCKER Networking
+
+root@ubuntu:~/Nils/webserver# ifconfig
+docker0   Link encap:Ethernet  HWaddr 02:42:fa:49:9e:a9
+          inet addr:172.17.0.1  Bcast:0.0.0.0  Mask:255.255.0.0
+          inet6 addr: fe80::42:faff:fe49:9ea9/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:12409 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:14596 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:745077 (745.0 KB)  TX bytes:75949120 (75.9 MB)
+		  
+
+root@ubuntu:~# apt-get install bridge-utils
+Reading package lists... Done
+Building dependency tree
+Reading
+
+root@ubuntu:~# brctl show docker
+bridge name     bridge id               STP enabled     interfaces
+docker          can't get info No such device
+root@ubuntu:~#
+
+## We can chane PROTOCOL from TCP to UDP
+
+root@ubuntu:~# docker run -d -p 5001:80/udp webserver
+2cbc06dfdb80757d0d54dd108e4d6d337911e9b920793d50de1e9c494305be6d
+root@ubuntu:~# 		  
+
+root@ubuntu:~# docker port 2cbc06dfdb80
+80/udp -> 0.0.0.0:5001
+root@ubuntu:~#
+
+
+## We can STOP container in one shoot
+
+root@ubuntu:~# docker stop 2cbc06dfdb80 1731062d8a9c 87af53d2ecd2 fe407958ac83
+2cbc06dfdb80
+1731062d8a9c
+87af53d2ecd2
+fe407958ac83
+root@ubuntu:~#
+
+
+##Linking of Containers
+
+root@ubuntu:~# docker run --name=source -d webserver
+66b5078dff52d2446cf060f7fdeabe5a5ded7d4cfac01a147d35073dd19db648
+root@ubuntu:~#
+
+#Link source container with new reciver container
+
+root@ubuntu:~# docker run --name=reciver --link=source:alis_source -it my1image /bin/bash
+[root@fd88a2900b23 /]#
+
+#Checking as inspect
+
+root@ubuntu:~# docker inspect reciver | grep Link -1
+        "PortBindings": {},
+        "Links": [
+            "/source:/reciver/alis_source"
+
+
+#There will be no link from source
+			
+root@ubuntu:~# docker inspect source  | grep Link -1
+        "PortBindings": {},
+        "Links": null,
+
+#Source provides the bunch of Variables to Reciver
+
+[root@fd88a2900b23 /]# env
+HOSTNAME=fd88a2900b23
+.
+.
+ALIS_SOURCE_PORT_80_TCP_PORT=80
+ALIS_SOURCE_PORT_80_TCP_ADDR=172.17.0.2
+_=/usr/bin/env
+[root@fd88a2900b23 /]#
+		
