@@ -1,0 +1,30 @@
+##Vagrant
+
+C:\Users\nilesh>vagrant init hashicorp/precise64
+A `Vagrantfile` has been placed in this directory. You are now
+ready to `vagrant up` your first virtual environment! Please read
+the comments in the Vagrantfile as well as documentation on
+`vagrantup.com` for more information on using Vagrant.
+
+C:\Users\nilesh>vagrant up
+Bringing machine 'default' up with 'virtualbox' provider...
+==> default: Box 'hashicorp/precise64' could not be found. Attempting to find an
+d install...
+    default: Box Provider: virtualbox
+    default: Box Version: >= 0
+==> default: Loading metadata for box 'hashicorp/precise64'
+    default: URL: https://atlas.hashicorp.com/hashicorp/precise64
+==> default: Adding box 'hashicorp/precise64' (v1.1.0) for provider: virtualbox
+    default: Downloading: https://atlas.hashicorp.com/hashicorp/boxes/precise64/
+versions/1.1.0/providers/virtualbox.box
+    default: Progress: 29% (Rate: 6513/s, Estimated time remaining: 3:22:24))
+C:\Users\nilesh>
+C:\Users\nilesh>==> default: Waiting for cleanup before exiting...
+    default: Progress: 29% (Rate: 9648/s, Estimated time remaining: 3:22:25)
+==> default: Box download was interrupted. Exiting.
+The box failed to unpackage properly. Please verify that the box
+file you're trying to add is not corrupted and try again. The
+output from attempting to unpackage (if any):
+
+x box-disk1.vmdk: Truncated tar archive
+bsdtar.EXE: Error exit delayed from previous errors.
